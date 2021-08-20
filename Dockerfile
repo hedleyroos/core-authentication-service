@@ -22,6 +22,6 @@ RUN pip install -e .
 
 RUN BUILDER="true" python manage.py compilemessages
 
-EXPOSE 8000
+EXPOSE 80
 
 CMD ["project.wsgi:application"]
