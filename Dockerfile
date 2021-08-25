@@ -24,4 +24,4 @@ RUN BUILDER="true" python manage.py compilemessages
 
 EXPOSE 80
 
-CMD ["project.wsgi:application"]
+CMD ["uwsgi", "uwsgi.ini"]
