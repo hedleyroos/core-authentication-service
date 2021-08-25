@@ -24,4 +24,4 @@ RUN BUILDER="true" python manage.py compilemessages
 
 EXPOSE 80
 
-CMD ["uwsgi", "uwsgi.ini"]
+ENTRYPOINT python manage.py migrate && uwsgi uwsgi.ini
