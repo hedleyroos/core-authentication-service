@@ -24,4 +24,4 @@ RUN BUILDER="true" python manage.py compilemessages
 
 EXPOSE 80
 
-CMD python manage.py migrate && uwsgi uwsgi.ini
+CMD sleep 10 && python manage.py migrate && uwsgi uwsgi.ini
