@@ -125,6 +125,18 @@ class CustomScopeClaims(ScopeClaims):
 
         roles = api_helpers.get_user_site_role_labels_aggregated(
             self.user.id, self.client.id)
-        result = {"roles": roles}
+
+        # Hedley extra bit. Hacked in to prove the concept.
+        role_ids = []
+        for role in api_helpers.get_role_list():
+            if role.label in roles:
+                role_ids.append(role.id)
+        resource_permissions = []
+        if role_ids:
+            resource_permissions = api_helpers.get_resource_permissions_for_roles(role_ids)
+
+        # TODO: kort naam van permission en UUID van resource
+        # No idea why I need to str it
+        result = {"roles": roles, "role_ids": role_ids, "resource_permissions": str(resource_permissions)}
 
         return result

@@ -83,6 +83,12 @@ def get_user_site_role_labels_aggregated(user_id, client_id):
     )
 
 
+def get_resource_permissions_for_roles(role_ids):
+    return settings.AC_OPERATIONAL_API.get_resource_permissions_for_roles(
+        role_ids
+    )
+
+
 def get_invitation_data(invitation_id):
     try:
         invitation_data = settings.ACCESS_CONTROL_API.invitation_read(
