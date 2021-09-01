@@ -83,6 +83,10 @@ def get_user_site_role_labels_aggregated(user_id, client_id):
     )
 
 
+def get_role_list():
+    return settings.ACCESS_CONTROL_API.role_list()
+
+
 def get_resource_permissions_for_roles(role_ids):
     return settings.AC_OPERATIONAL_API.get_resource_permissions_for_roles(
         role_ids
