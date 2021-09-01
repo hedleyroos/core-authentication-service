@@ -131,9 +131,11 @@ class CustomScopeClaims(ScopeClaims):
         # a user has a certain permission on a resource, so we assemble a data structure
         # and let the client application do the access control check.
         role_ids = []
+        role_id_labels = {}
         for role in api_helpers.get_role_list():
             if role.label in roles:
                 role_ids.append(role.id)
+            role_id_labels[role.id] = role.label
 
         final = {}
         if role_ids:
@@ -161,6 +163,14 @@ class CustomScopeClaims(ScopeClaims):
                     final[resource_urn] = []
                 final[resource_urn].append(permission_names[rp.permission_id])
 
-        result = {"roles": roles, "role_ids": role_ids, "resource_permissions": final}
+        domain_roles = {}
+        for coded, role_ids in api_helpers.get_all_user_roles(str(self.user.id)).roles_map.items():
+            if coded.startswith("d:"):
+                dc, domain_id = coded.split(":")
+                domain_roles[domain_id] = []
+                for role_id in role_ids:
+                    domain_roles[domain_id].append(role_id_labels[role_id])
+
+        result = {"roles": roles, "role_ids": role_ids, "resource_permissions": final, "domain_roles": domain_roles}
 
         return result

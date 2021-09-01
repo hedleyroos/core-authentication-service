@@ -101,6 +101,12 @@ def get_permission_list(permission_ids=[]):
     return settings.ACCESS_CONTROL_API.permission_list(permission_ids=permission_ids)
 
 
+def get_all_user_roles(user_id):
+    return settings.AC_OPERATIONAL_API.get_all_user_roles(
+        user_id=user_id
+    )
+
+
 def get_invitation_data(invitation_id):
     try:
         invitation_data = settings.ACCESS_CONTROL_API.invitation_read(
