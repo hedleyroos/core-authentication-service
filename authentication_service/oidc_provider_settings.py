@@ -126,17 +126,41 @@ class CustomScopeClaims(ScopeClaims):
         roles = api_helpers.get_user_site_role_labels_aggregated(
             self.user.id, self.client.id)
 
-        # Hedley extra bit. Hacked in to prove the concept.
+        # Hedley modifications from here
+        # The Access Control service doesn't currently have an API to query whether
+        # a user has a certain permission on a resource, so we assemble a data structure
+        # and let the client application do the access control check.
         role_ids = []
         for role in api_helpers.get_role_list():
             if role.label in roles:
                 role_ids.append(role.id)
-        resource_permissions = []
+
+        final = {}
         if role_ids:
             resource_permissions = api_helpers.get_resource_permissions_for_roles(role_ids)
+            resource_ids = []
+            permission_ids = []
+            for rp in resource_permissions:
+                resource_ids.append(rp.resource_id)
+                permission_ids.append(rp.permission_id)
 
-        # TODO: kort naam van permission en UUID van resource
-        # No idea why I need to str it
-        result = {"roles": roles, "role_ids": role_ids, "resource_permissions": str(resource_permissions)}
+            resource_urns = {}
+            if resource_ids:
+                for resource in api_helpers.get_resource_list(resource_ids=resource_ids):
+                    resource_urns[resource.id] = resource.urn
+
+            permission_names = {}
+            if permission_ids:
+                for permission in api_helpers.get_permission_list(permission_ids=permission_ids):
+                    permission_names[permission.id] = permission.name
+
+            translated_resource_permissions = {}
+            for rp in resource_permissions:
+                resource_urn = resource_urns[rp.resource_id]
+                if resource_urn not in final:
+                    final[resource_urn] = []
+                final[resource_urn].append(permission_names[rp.permission_id])
+
+        result = {"roles": roles, "role_ids": role_ids, "resource_permissions": final}
 
         return result

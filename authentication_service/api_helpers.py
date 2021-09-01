@@ -93,6 +93,14 @@ def get_resource_permissions_for_roles(role_ids):
     )
 
 
+def get_resource_list(resource_ids=[]):
+    return settings.ACCESS_CONTROL_API.resource_list(resource_ids=resource_ids)
+
+
+def get_permission_list(permission_ids=[]):
+    return settings.ACCESS_CONTROL_API.permission_list(permission_ids=permission_ids)
+
+
 def get_invitation_data(invitation_id):
     try:
         invitation_data = settings.ACCESS_CONTROL_API.invitation_read(
