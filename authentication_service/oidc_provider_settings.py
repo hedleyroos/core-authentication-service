@@ -137,40 +137,53 @@ class CustomScopeClaims(ScopeClaims):
                 role_ids.append(role.id)
             role_id_labels[role.id] = role.label
 
-        final = {}
-        if role_ids:
-            resource_permissions = api_helpers.get_resource_permissions_for_roles(role_ids)
-            resource_ids = []
-            permission_ids = []
-            for rp in resource_permissions:
-                resource_ids.append(rp.resource_id)
-                permission_ids.append(rp.permission_id)
+        # Map domain names for easy lookup
+        domain_id_names = {}
+        for domain in api_helpers.get_domain_list():
+            domain_id_names[domain.id] = domain.name
 
-            resource_urns = {}
-            if resource_ids:
-                for resource in api_helpers.get_resource_list(resource_ids=resource_ids):
-                    resource_urns[resource.id] = resource.urn
-
-            permission_names = {}
-            if permission_ids:
-                for permission in api_helpers.get_permission_list(permission_ids=permission_ids):
-                    permission_names[permission.id] = permission.name
-
-            translated_resource_permissions = {}
-            for rp in resource_permissions:
-                resource_urn = resource_urns[rp.resource_id]
-                if resource_urn not in final:
-                    final[resource_urn] = []
-                final[resource_urn].append(permission_names[rp.permission_id])
-
-        domain_roles = {}
+        domain_access = {}
         for coded, role_ids in api_helpers.get_all_user_roles(str(self.user.id)).roles_map.items():
             if coded.startswith("d:"):
                 dc, domain_id = coded.split(":")
-                domain_roles[domain_id] = []
-                for role_id in role_ids:
-                    domain_roles[domain_id].append(role_id_labels[role_id])
+                domain_id = int(domain_id)
+                key = domain_id_names[domain_id]
 
-        result = {"roles": roles, "role_ids": role_ids, "resource_permissions": final, "domain_roles": domain_roles}
+                # Prep the structure
+                domain_access[key] = {"roles": [], "resource_permissions": {}}
+
+                # Set role labels
+                for role_id in role_ids:
+                    #domain_roles[key].append(role_id_labels[role_id])
+                    domain_access[key]["roles"].append(role_id_labels[role_id])
+
+                # Resource permissions for the domain
+                final = {}
+                resource_permissions = api_helpers.get_resource_permissions_for_roles(role_ids)
+                resource_ids = []
+                permission_ids = []
+                for rp in resource_permissions:
+                    resource_ids.append(rp.resource_id)
+                    permission_ids.append(rp.permission_id)
+
+                resource_urns = {}
+                if resource_ids:
+                    for resource in api_helpers.get_resource_list(resource_ids=resource_ids):
+                        resource_urns[resource.id] = resource.urn
+
+                permission_names = {}
+                if permission_ids:
+                    for permission in api_helpers.get_permission_list(permission_ids=permission_ids):
+                        permission_names[permission.id] = permission.name
+
+                for rp in resource_permissions:
+                    resource_urn = resource_urns[rp.resource_id]
+                    if resource_urn not in final:
+                        final[resource_urn] = []
+                    final[resource_urn].append(permission_names[rp.permission_id])
+
+                domain_access[key]["resource_permissions"] = final
+
+        result = {"roles": roles, "domain_access": domain_access}
 
         return result

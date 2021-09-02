@@ -107,6 +107,10 @@ def get_all_user_roles(user_id):
     )
 
 
+def get_domain_list(domain_ids=[]):
+    return settings.ACCESS_CONTROL_API.domain_list(domain_ids=domain_ids)
+
+
 def get_invitation_data(invitation_id):
     try:
         invitation_data = settings.ACCESS_CONTROL_API.invitation_read(
